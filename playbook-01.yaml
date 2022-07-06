@@ -1,0 +1,22 @@
+# Taken from Red Hat's "Ansible Basics: An Automation Technical Overview" Udemy course
+---
+- name: Install and start Apache
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: httpd package is present
+      yum:
+        name: httpd
+        state: latest
+
+    - name: latest index.html file is present
+      template:
+        src: files/index.html
+        dest: /var/www/html/
+
+    - name: httpd is started
+      service:
+        name: httpd
+        state: started
+
