@@ -1,0 +1,130 @@
+#
+# YAML intro: https://www.educative.io/courses/introduction-to-yaml/N881Nq9pVY8
+# All rights to the content of this comment belong to author(s) of the article at the
+# url above.
+#
+# YAML is used to store lists or sequences of elements and key-value pairs or mappings.
+# YAML stream is a collection of zero or more documents.
+# A single document may or may not be marked with (---).
+# You can add multiple documents to a single YAML file.
+# Different documents are separated using three dashes (---).
+# Documents could end with (...).
+# Three dots (...) is used to mark the end of a document without starting a new one.
+# YAML is case sensitive.
+#
+# List (Sequence) is an ordered collection of items.
+# A list is represented by preceding its items with - (hyphen):
+#   - <element 1>
+#   - <element 2>
+#   - ...
+#   - <element n>
+#
+# Key value pairs (Mapping) is an unordered collection of key/value pairs.
+# The keys are not unique because they are allowed to have duplicate values.
+# Key-value pairs are represented using the following syntax:
+#   <key>: <value>
+# where <key> represents name and <value> represents data separated by : (the
+# space is mandatory).
+# Key-value pair example:
+#   key: value
+#
+# YAML structures are determined by spaces and indentations similar to that of
+# the Python programming language. Spaces are the only way to achieve
+# indentation. Tabs are NOT allowed in YAML.
+#
+#
+# There are two YAML format styles: block and flow
+#
+# A document in block style uses spaces for structuring the document. It is much
+# easier to read, but it is less compact.
+#
+# color:
+#   - red
+#   - yellow
+#   - blue
+#
+# flow style, it allows sequences and mappings to be written inline without
+# having to rely on indentation, using a pair of square brackets [] and curly
+# brackets {} respectively.
+#
+# color: [red, blue]
+#
+# - { name: 'James', age: 35 }
+#
+#
+# Any text after # not enclosed in ''(quotes) or "" (double quotes) is
+# considered a comment.
+#
+
+# NOTE: Ansible does NOT allow multiple documents withn the single YAML file.
+# https://github.com/ansible/ansible/issues/42898
+#
+#   $ ansible-playbook ./run_locally/yaml_demo.yaml
+#   [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+#   ERROR! Syntax Error while loading YAML.
+#    but found another document
+#
+# ---
+# - name: Run first YAML document
+#   hosts: localhost
+#   gather_facts: no
+
+#   tasks:
+#     - name: Print debug message
+#       ansible.builtin.debug:
+#         msg: Hello, world!
+
+# ---
+# - name: Run second YAML document
+#   hosts: localhost
+#   gather_facts: no
+
+#   tasks:
+#     - name: Print debug message
+#       ansible.builtin.debug: "msg=\"Hello, world! 2!\""
+# ---
+# - name: Run third YAML document
+#   hosts: localhost
+#   gather_facts: no
+
+#   tasks:
+#     - name: Print debug message
+#       ansible.builtin.debug: "msg='Hello, world! 3!'"
+
+# ---
+# - {
+#     "name": "Run fouth YAML document",
+#     "hosts": "localhost",
+#     "gather_facts": "no",
+#     "tasks":
+#     [
+#       {
+#         "name": "Print debug message",
+#         "ansible.builtin.debug":
+#           {
+#             "msg": "Hello, world! 4!"
+#           }
+#       }
+#     ]
+#   }
+
+---
+# Flow style is an extension of JSON:
+[
+  {
+    "name": "Run fouth YAML document",
+    "hosts": "localhost",
+    "gather_facts": "no",
+    "tasks":
+    [
+      {
+        "name": "Print debug message",
+        "ansible.builtin.debug":
+          {
+            "msg": "Hello, world! 4!"
+          }
+      }
+    ]
+  }
+]
+...
