@@ -32,6 +32,19 @@
 # the Python programming language. Spaces are the only way to achieve
 # indentation. Tabs are NOT allowed in YAML.
 #
+# When to use indentation?
+# Key needs to be indented if it's a part of the value of the current key.
+# (Otherwise, if it's at the same level as the current key, it would be rendered
+# as one of attributes of the parent key, just as current key is).
+#
+# key1:
+#   key2: val2 <-- value of key1 is { key2: val2 }
+#
+# vs
+#
+# key1: <-- value of key1 is empty object {}
+# key2: val2
+#
 #
 # There are two YAML format styles: block and flow
 #

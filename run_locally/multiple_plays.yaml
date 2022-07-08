@@ -1,0 +1,23 @@
+# https://docs.ansible.com/ansible/latest/reference_appendices/playbooks_keywords.html#play
+# - name: Play 1 (has 1 task, to print "Hello, world!" message)
+#   hosts: localhost
+#   tasks:
+#     - name: Print debug message
+#       ansible.builtin.debug:
+#         msg: Hello, world!
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/file_module.html#ansible-collections-ansible-builtin-file-module
+- name: Create directory and a file in it
+  hosts: localhost
+  tasks:
+    - name: Create directory
+      ansible.builtin.file:
+          path: ./temp
+          state: directory
+          mode: '0755'
+
+    - name: Create a file, using symbolic modes to set the permissions (equivalent to 0644)
+      ansible.builtin.file:
+        path: ./temp/foo.txt
+        state: touch
+        mode: u=rw,g=r,o=r

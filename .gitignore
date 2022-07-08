@@ -1,3 +1,4 @@
 # ansible-navigator run artifacts
 **/*-artifact-*.json
 **/ansible-navigator.log
+**/temp/*
