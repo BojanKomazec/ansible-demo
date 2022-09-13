@@ -1,0 +1,16 @@
+---
+- name: Output facts within a playbook
+  # hosts: all
+  hosts: localhost
+
+  # The following line is added implicitly to every playbook so we don't need to add it ourselves:
+  # gather_facts: true
+  #
+  #If we do set it explicitly to false, all facts variables will be undefined
+  # (and we'll get a fatal error when executing this playbook)
+  # gather_facts: false
+
+  tasks:
+  - name: Prints Ansible facts
+    debug:
+      msg: The default IPv4 address of {{ ansible_fqdn }} is {{ ansible_default_ipv4.address }}

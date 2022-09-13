@@ -1,0 +1,19 @@
+# Example based on source code from:
+# https://www.udemy.com/course/ansible-basics-an-automation-technical-overview/learn/lecture/28777292
+#
+# To run this playbook:
+# $ ansible-playbook ./run_locally/variables_demo.yaml
+#
+---
+- name: variables demo playbook
+  hosts: localhost
+  vars:
+    var_one: awesome
+    var_two: ansible is
+    # example of variable unpacking (double curly braces):
+    var_three: "{{var_two}} {{var_one}}"
+  tasks:
+    - name: print out var_three
+      # debug module is handy for printing variable values (or any other messages)
+      debug:
+        msg: "{{ var_three}}"

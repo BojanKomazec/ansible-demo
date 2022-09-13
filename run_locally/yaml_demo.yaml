@@ -19,6 +19,18 @@
 #   - ...
 #   - <element n>
 #
+# List with a single element:
+# - name: "Bojan"
+#   surname: "Komazec"
+# or, in flow style:
+# [ {name: "Bojan", surname: "Komazec"} ]
+#
+# If this is transformed to JSON, that'd also be a list with a single element:
+# [{"name": "Bojan", "surname": "Komazec"}]
+#
+# There are multiple YAML to JSON conversion tools, like
+# https://onlineyamltools.com/convert-yaml-to-json
+#
 # Key value pairs (Mapping) is an unordered collection of key/value pairs.
 # The keys are not unique because they are allowed to have duplicate values.
 # Key-value pairs are represented using the following syntax:
@@ -35,7 +47,7 @@
 # When to use indentation?
 # Key needs to be indented if it's a part of the value of the current key.
 # (Otherwise, if it's at the same level as the current key, it would be rendered
-# as one of attributes of the parent key, just as current key is).
+# as one of attributes of the parent key, just as the current key is).
 #
 # key1:
 #   key2: val2 <-- value of key1 is { key2: val2 }
@@ -60,7 +72,7 @@
 # having to rely on indentation, using a pair of square brackets [] and curly
 # brackets {} respectively.
 #
-# color: [red, blue]
+# color: [red, yellow, blue]
 #
 # - { name: 'James', age: 35 }
 #
@@ -69,7 +81,7 @@
 # considered a comment.
 #
 
-# NOTE: Ansible does NOT allow multiple documents withn the single YAML file.
+# NOTE: Ansible does NOT allow multiple documents within the single YAML file.
 # https://github.com/ansible/ansible/issues/42898
 #
 #   $ ansible-playbook ./run_locally/yaml_demo.yaml
