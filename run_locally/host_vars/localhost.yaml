@@ -1,0 +1,3 @@
+# values of variables in host_vars override values from group_vars as hosts are more specific than groups
+---
+stage: prod

@@ -2,6 +2,9 @@
 ---
 - name: Install and start Apache
   hosts: web
+  # require a privilege escalation
+  # https://www.shellhacks.com/ansible-sudo-a-password-is-required/
+  # use ansible-playbook --ask-become-pass
   become: yes
 
   tasks:

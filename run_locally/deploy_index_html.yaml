@@ -2,9 +2,17 @@
 - name: Copy web.html
 # hosts: web
   hosts: localhost
+  hosts: all
+  connection: local
   become: true
   tasks:
+  - name: Create ./temp/html directory if it doesn't exist
+    ansible.builtin.file:
+      path: ./temp/html/
+      state: directory
+      mode: '0755'
   - name: Copy web.html
     copy:
-      src: "{{ stage }}_web.html"
-      dest: /var/www/html/index.html
+      src: "./resources/{{ stage }}_web.html"
+#     dest: /var/www/html/index.html
+      dest: ./temp/html/index.html
