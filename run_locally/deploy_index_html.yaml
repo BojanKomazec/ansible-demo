@@ -1,10 +1,13 @@
 ---
 - name: Copy web.html
+  # hosts needs to be specified otherwise the following error is issued: "ERROR! the field 'hosts' is required but was not set"
 # hosts: web
   hosts: localhost
-  hosts: all
+# hosts: all
+  # required to suppress error message: "Failed to connect to the host via ssh: bojan@localhost: Permission denied (publickey,password)."
   connection: local
-  become: true
+  # If enabled we need to prompt user for root pass via e.g. ansible-playbook --ask-become-pass
+# become: true
   tasks:
   - name: Create ./temp/html directory if it doesn't exist
     ansible.builtin.file:
