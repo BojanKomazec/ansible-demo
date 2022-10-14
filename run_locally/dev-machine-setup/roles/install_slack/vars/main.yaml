@@ -1,0 +1,2 @@
+# vscode_public_key_path: /tmp/vscode-package-signing-key.pub
+slack_deb_package_path: /tmp/slack.deb

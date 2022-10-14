@@ -1,0 +1,31 @@
+- name: Gather package facts
+  package_facts:
+    manager: apt
+- name: Download Zoom public key
+  register: output
+  ansible.builtin.get_url:
+    url: https://zoom.us/client/5.12.0.4682/zoom_amd64.deb
+    dest: "{{ zoom_installer_path }}"
+- debug: var=output
+- name: Download Zoom public key
+  register: output
+  ansible.builtin.get_url:
+    url: https://zoom.us/linux/download/pubkey
+    dest: "{{ zoom_public_key_path }}"
+- debug: var=output
+- name: Verify the key, using a fingerprint, before import
+  register: output
+  ansible.builtin.rpm_key:
+    key: "{{ zoom_public_key_path }}"
+    # taken from https://zoom.us/download?os=linux
+    fingerprint: 3960 60CA DD8A 7522 0BFC B369 B903 BF18 61A7 C71D
+- debug: var=output
+- name: Install Zoom's .deb package
+  register: output
+  ansible.builtin.apt:
+    deb: "{{ zoom_installer_path }}"
+- debug: var=output
+- name: Cleanup
+  ansible.builtin.file:
+    path: "{{ zoom_installer_path }}"
+    state: absent

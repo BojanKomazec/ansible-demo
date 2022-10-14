@@ -1,0 +1,13 @@
+- name: Install cryptography python package
+  ansible.builtin.pip:
+    name: cryptography
+- name: Generate an OpenSSH keypair with ed25519 algorithm
+  register: output
+  community.crypto.openssh_keypair:
+    path: ~/.ssh/id_ssh_ed25519_corporate_git
+    type: ed25519
+    force: no # don't create it if it already exists
+    comment: bojan.komazec@example.com
+    backend: cryptography
+    passphrase: "{{ corporate_git_ssh_key_password }}"
+- debug: var=output

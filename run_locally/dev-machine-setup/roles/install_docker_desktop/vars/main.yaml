@@ -1,0 +1,5 @@
+# $USER is root if --ask-become-pass is passed
+# non_root_user: $USER
+non_root_user: "{{ ansible_user_id }}"
+# non_root_user: bojan.komazec
+desktop_docker_deb_package_path: /tmp/docker_desktop.deb

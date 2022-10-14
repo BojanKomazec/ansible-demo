@@ -1,0 +1,2 @@
+zoom_public_key_path: /tmp/zoom-package-signing-key.pub
+zoom_installer_path: /tmp/zoom_amd64.deb

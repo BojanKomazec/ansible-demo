@@ -1,0 +1,7 @@
+- name: Install required apt packages
+  become: yes
+  register: output
+  ansible.builtin.apt:
+    pkg:
+    - mariadb-client
+- debug: var=output.stdout

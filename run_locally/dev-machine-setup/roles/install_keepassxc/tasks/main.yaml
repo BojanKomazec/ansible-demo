@@ -1,0 +1,5 @@
+# https://keepassxc.org/download/#linux
+- name: Install KeePassXC Snap package
+  community.general.snap:
+    name:
+      - keepassxc

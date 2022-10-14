@@ -1,0 +1,2 @@
+# vscode_public_key_path: /tmp/vscode-package-signing-key.pub
+chrome_deb_package_path: /tmp/chrome.deb
