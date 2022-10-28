@@ -1,0 +1,92 @@
+# Example based on source code from:
+# https://www.udemy.com/course/ansible-basics-an-automation-technical-overview/learn/lecture/28777292
+#
+# To run this playbook:
+# $ ansible-playbook ./run_locally/variables_demo.yaml
+#
+# Check out Ansible special variables:
+# https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
+# 
+# Ansible Vault:
+# 
+#   $ ansible-vault create ./run_locally/variables_demo/vars/db/vault.yaml
+# created
+#   ./run_locally/variables_demo/vars/db/vault.yaml
+# This command prompts us to set the vault's password ('ok') and opens default or custom set editor
+# to enter the content of the file. The idea in our example is that vault is a yaml file containing
+# one or multiple variables.
+#
+# To view the decrypted content of the vault:
+#   $ ansible-vault view ./run_locally/variables_demo/vars/db/vault.yaml
+#
+# To edit the content of the vault:
+#   $ ansible-vault edit ./run_locally/variables_demo/vars/db/vault.yaml
+# This command opens the decrypted file in an editor.
+#
+# When running this playbook we need somehow to provide a vault's password.
+# One way to do that is to prompt user:
+#   $ ansible-playbook --ask-vault-pass ./run_locally/variables_demo/main.yaml
+# Another way is to write a vault pass in a file and specify this file later when calling ansible-playbook:
+#   $ ansible-playbook \
+#     --vault-password-file=./run_locally/variables_demo/vars/db/.vault_pass \
+#     ./run_locally/variables_demo/main.yaml 
+# 
+# Make sure vault pass file does not get committed by accident. (Add it to .gitignore) 
+# Vault password file can be specified in environment varible, in which case we don't need to use
+# --vault-password-file:
+#   $ export ANSIBLE_VAULT_PASSWORD_FILE=./run_locally/variables_demo/vars/db/.vault_pass
+# 
+# Vault password file can be specified in ansible.cfg:
+#   [defaults]
+#   . . .
+#   vault_password_file = ./run_locally/variables_demo/vars/db/.vault_pass
+# 
+# As of now, Ansible does NOT provide environment variable for storing vault password itself.
+# 
+---
+- name: variables demo playbook
+  hosts: localhost
+  vars:
+    var_one: awesome
+    var_two: ansible is
+    # example of variable unpacking (double curly braces):
+    var_three: "{{var_two}} {{var_one}}"
+  # vars_files allows specifying paths to yaml files (including vaults) containig variables
+  vars_files:
+    - "{{ playbook_dir }}/vars/db/mysql.yaml"
+    - "{{ playbook_dir }}/vars/db/vault.yaml"
+  tasks:
+    - name: print out var_three
+      # debug module is handy for printing variable values (or any other messages)
+      ansible.builtin.debug:
+        msg: "{{ var_three}}"
+    - name: Test if per-host variables are interpolated in task names. So ansible_user = {{ansible_user}} 
+      ansible.builtin.debug:
+        msg: ansible_user was NOT interpolated :(
+    - name: Test if global variables are interpolated in task names. So var_three = {{var_three}} 
+      ansible.builtin.debug:
+        msg: var_three value WAS interpolated :)
+    - name: Print the name of the current role and its path
+      ansible.builtin.debug:
+        msg: role_name = {{ role_name }}; role_path = {{ role_path }}
+      ignore_errors: yes
+    - name: Print the direcotry of the currently executed playbook
+      ansible.builtin.debug:
+        msg: playbook_dir = {{ playbook_dir }}
+      ignore_errors: yes
+    - name: Print variables defined in an arbitrary file, including those defined in a vault
+      ansible.builtin.debug:
+        msg: "mysql settings: host = {{ host }}, port = {{ port}}, user = {{ user }}, pwd = {{ pwd }}"
+    # Variables can also be added as a task.
+    # Conditional task execution means we can conditionally import variable files.
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_vars_module.html
+    - name: Include vars from an arbitrary file
+      ansible.builtin.include_vars:
+        file: "{{ playbook_dir }}/vars/my_vars.yaml"
+      when: user == "bojan"
+    # Make sure you don't use ansible.builtin.include_vars module together with e.g. ansible.builtin.debug
+    # in a signle task as otherwise you'll get the following error:
+    #   ERROR! conflicting action statements: ansible.builtin.include_vars, ansible.builtin.debug
+    - name: Print variables defined in an arbitrary file
+      ansible.builtin.debug:
+        msg: "user_id = {{ user_id }}"
