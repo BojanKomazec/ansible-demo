@@ -1,0 +1,38 @@
+# -L, --location = (HTTP) If the server reports that the requested page has moved to a different location
+#    (indicated with a Location: header and a 3XX  response  code),
+#    this  option  will  make  curl redo the request on the new place.
+# -O, --remote-name = Write output to a local file named like the remote file we get.
+# curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+# TODO: Download only if minikube is not installed or if version is not the last one!
+- name: Download minikube-linux-amd64
+  ansible.builtin.get_url:
+    url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+    dest: /tmp/minikube-linux-amd64
+    mode: '0440'
+
+ # 1989  sudo install minikube-linux-amd64 /usr/local/bin/minikube
+- name: Install Minikube
+  become: true
+  ansible.builtin.shell:
+    cmd: install minikube-linux-amd64 /usr/local/bin/minikube
+    chdir: /tmp
+  register: output_install
+- name: Print output
+  ansible.builtin.debug:
+    var: output_install.stdout_lines
+- name: Verify Minikube installation
+  ansible.builtin.shell:
+    cmd: minikube version
+  register: output_shell
+- name: Print output
+  ansible.builtin.debug:
+    var: output_shell.stdout_lines
+# rm minikube-linux-amd64
+- name: Remove file minikube-linux-amd64
+  ansible.builtin.file:
+    path: /tmp/minikube-linux-amd64
+    state: absent
+  register: output_rm
+- name: Print output
+  ansible.builtin.debug:
+    var: output_rm

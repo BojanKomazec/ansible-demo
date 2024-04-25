@@ -1,0 +1,8 @@
+# Example taken from https://rderik.com/blog/using-ansible-to-automate-local-tasks-and-setup/
+---
+- name: Check system uptime
+  ansible.builtin.command:
+    cmd: uptime
+  register: output_uptime
+- ansible.builtin.debug:
+    var: output_uptime.stdout_lines

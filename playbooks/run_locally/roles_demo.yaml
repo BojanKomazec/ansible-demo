@@ -1,0 +1,18 @@
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
+# https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
+---
+- name: Demo including and calling locally defined roles
+  hosts: localhost
+  connection: local
+  roles:
+      # If role is included only by its name
+      #   $ ansible-playbook ./run_locally/roles_demo.yaml
+      # will issue the following error which unveils paths that Ansible uses when looking for roles:
+      #   ERROR! the role 'bkomazec.uptime' was not found in /home/bojan/dev/github/ansible-demo/run_locally/roles:/home/bojan/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:/home/bojan/dev/github/ansible-demo/run_locally
+#   - bkomazec.uptime
+    - role: '{{ playbook_dir }}/../roles/bkomazec.uptime'
+    - role: '{{ playbook_dir }}/../roles/bkomazec.ubuntu_packages_update'
+  tasks:
+    - name: Print playbook_dir
+      ansible.builtin.debug:
+        msg: playbook_dir = {{ playbook_dir }}

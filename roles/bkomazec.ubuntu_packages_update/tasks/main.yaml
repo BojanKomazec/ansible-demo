@@ -1,0 +1,17 @@
+---
+- name: Update all apt packages to their latest version
+# "module_stderr": "sudo: a password is required\n"
+# If enabled we need to prompt user for root pass via e.g. ansible-playbook --ask-become-pass
+  become: true
+  ansible.builtin.apt:
+    upgrade: true
+    update_cache: true
+    cache_valid_time: 3600 # One hour
+    # cache_valid_time: 86400 # One day
+    # Use eaither upgrade or name and state
+    # name: "*"
+    # state: latest
+  register: output_apt
+- name: Print output
+  ansible.builtin.debug:
+    var: output_apt.stdout_lines

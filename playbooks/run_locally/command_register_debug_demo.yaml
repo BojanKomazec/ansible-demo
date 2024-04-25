@@ -1,0 +1,54 @@
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html#ansible-builtin-command-module-execute-commands-on-targets
+---
+- name: Play 1
+  hosts: localhost
+  connection: local
+  vars:
+    backup_dir: backup
+  tasks:
+    - name: Check disk space
+      # ansible.builtin.command module – Execute commands on targets.
+      # Part of ansible-core, included in all Ansible installations.
+      # The short module name command can be used as here:
+      ansible.builtin.command: df -h
+      # Ansible register is a way to capture the output from task execution
+      # and store it in a variable. This variable can then be used in
+      # conditional statements, logging etc.
+      # We can create variables from the output of an Ansible task with
+      # the task keyword 'register'. We can use registered variables in
+      # any later tasks in the play. Each registered variable is valid on
+      # the remote host where the task was run for the rest of the playbook
+      # execution.
+      # Shell commands may have outputs. By default, the output is ignored.
+      # If you want to store the output in a variable and use it later,
+      # then you can use the Ansible register module.
+      register: df_result
+      # ansible.builtin.debug module – Print statements during execution
+      # parameter var = A variable name to debug.
+      # https://docs.ansible.com/ansible/latest/reference_appendices/common_return_values.html#stdout-lines
+    #- debug: var=df_result.stdout_lines
+    - debug:
+        var: df_result.stdout_lines
+#       var: df_result
+    - name: register and with_items demo
+      ansible.builtin.command:
+        # find command outuputs results in form of relative path (./file)
+        cmd: find . -name *.html -printf "%f\n"
+        # cmd: pwd
+        #cmd: ls -A1 *.html
+#       cmd: ls *.html
+        chdir: "{{playbook_dir}}/resources"
+      register: html_files_list
+    - ansible.builtin.debug:
+        var: html_files_list.stdout_lines
+    - name: create backup directory
+      ansible.builtin.file:
+        path: "{{playbook_dir}}/temp/{{backup_dir}}/"
+        state: directory
+    - name: Make copies of html files
+      ansible.builtin.command:
+        chdir: "{{playbook_dir}}/resources"
+        cmd: cp {{ item }} "{{playbook_dir}}/temp/{{backup_dir}}/{{ item }}.backup"
+        # doesn't work
+#       creates: "{{playbook_dir}}/temp/backup/"
+      loop: "{{ html_files_list.stdout_lines|flatten(levels=1) }}"

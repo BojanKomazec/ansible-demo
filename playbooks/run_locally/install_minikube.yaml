@@ -1,0 +1,18 @@
+# This playbook install Minikube on Ubuntu.
+# "module_stderr": "sudo: a password is required\n"
+# If enabled we need to prompt user for root pass via e.g. ansible-playbook --ask-become-pass
+---
+- name: Install Minikube on Ubuntu
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Print info message
+      ansible.builtin.debug:
+        msg: Installing Minikube
+
+  roles:
+    # - include: bkomazec.ubuntu_packages_update
+    - install_minikube
+
