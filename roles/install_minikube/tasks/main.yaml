@@ -9,11 +9,10 @@
     url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
     dest: /tmp/minikube-linux-amd64
     mode: '0440'
-
- # 1989  sudo install minikube-linux-amd64 /usr/local/bin/minikube
+ # sudo install minikube-linux-amd64 /usr/local/bin/minikube
 - name: Install Minikube
   become: true
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: install minikube-linux-amd64 /usr/local/bin/minikube
     chdir: /tmp
   register: output_install

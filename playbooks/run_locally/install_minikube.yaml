@@ -5,7 +5,7 @@
 - name: Install Minikube on Ubuntu
   hosts: localhost
   connection: local
-  gather_facts: false
+  # gather_facts: false
 
   tasks:
     - name: Print info message
@@ -13,6 +13,10 @@
         msg: Installing Minikube
 
   roles:
-    # - include: bkomazec.ubuntu_packages_update
+    - role: print_facts
+      vars:
+        fact: 'ansible_architecture'
+        # fact: 'architecture'
+    - bkomazec.ubuntu_packages_update
+    - install_kubectl
     - install_minikube
-

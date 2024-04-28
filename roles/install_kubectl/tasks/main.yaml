@@ -1,0 +1,62 @@
+---
+- name: Find the version string of the latest release of kubectl
+  ansible.builtin.command:
+    cmd: "curl -L -s https://dl.k8s.io/release/stable.txt"
+  register: get_url_output
+- ansible.builtin.set_fact:
+    kubectl_version={{ get_url_output.stdout }}
+- name: Print kubectl latest release version
+  ansible.builtin.debug:
+    var=kubectl_version
+  run_once: true
+- name: Download the latest release of kubectl
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
+    dest: /tmp/kubectl
+    mode: '0440'
+  when: ansible_architecture == "x86_64"
+#  curl -LO "https://dl.k8s.io/release/{{kubectl_version}}/bin/linux/amd64/"
+- name: Download the checksum file
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl.sha256"
+    dest: /tmp/kubectl.sha256
+    mode: '0440'
+  when: ansible_architecture == "x86_64"
+- name: Validate the kubectl binary against the checksum file
+  ansible.builtin.shell:
+    cmd: echo "$(cat /tmp/kubectl.sha256) /tmp/kubectl" | sha256sum --check
+  register: output_checksum_check
+- name: Print output_checksum_check
+  ansible.builtin.debug:
+    var: output_checksum_check
+- name: Process the validation output
+  ansible.builtin.fail:
+    msg: kubectl checksum validation failed
+  # when: output_checksum_check.stdout_lines != "kubectl: OK"
+  when: "('kubectl: OK' not in output_checksum_check.stdout_lines[0])"
+ # sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectlkubectl.sha256
+- name: Install kubectl
+  become: true
+  ansible.builtin.command:
+    cmd: install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    chdir: /tmp
+  register: output_install
+- name: Print output
+  ansible.builtin.debug:
+    var: output_install.stdout_lines
+- name: Verify kubectl installation
+  ansible.builtin.command:
+    cmd: kubectl version --client
+  register: output_shell
+- name: Print output
+  ansible.builtin.debug:
+    var: output_shell.stdout_lines
+# rm minikube-linux-amd64
+- name: Remove downloaded file from /tmp
+  ansible.builtin.file:
+    path: /tmp/kubectl
+    state: absent
+  register: output_rm
+- name: Print output
+  ansible.builtin.debug:
+    var: output_rm
