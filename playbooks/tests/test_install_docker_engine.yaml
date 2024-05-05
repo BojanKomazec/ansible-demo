@@ -1,0 +1,7 @@
+---
+- name: Test install_docker_engine role locally
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+  - install_docker_engine

@@ -18,5 +18,6 @@
         fact: 'ansible_architecture'
         # fact: 'architecture'
     - bkomazec.ubuntu_packages_update
+    - install_docker_engine
     - install_kubectl
     - install_minikube

@@ -1,0 +1,75 @@
+# This script follows steps listed here: https://docs.docker.com/engine/install/debian/#install-using-the-repository
+# To verify Docker installation run: 
+#    $ sudo docker run hello-world
+---
+- name: Install apt packages install ca-certificates curl
+  become: true
+  ansible.builtin.apt:
+    name:
+    - ca-certificates
+    - curl
+- name: Create /etc/apt/keyrings directory and set 0755 permissions
+  become: true
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  # Manual verification: $ ls -la /etc/apt/keyrings/
+- name: Download Docker's PGP Public key and save it in the keyring
+  become: true
+  ansible.builtin.get_url:
+    # url: https://download.docker.com/linux/debian/gpg
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '444'
+  # Manual verification: $ ls -la /etc/apt/keyrings/
+- name: Obtain processor architecture
+  ansible.builtin.command:
+    cmd: dpkg --print-architecture
+  register: cmd_output
+- name: Assign dpkg output to a variable
+  ansible.builtin.set_fact:
+    arch: "{{cmd_output.stdout}}"
+- name: Print processor architecture
+  ansible.builtin.debug:
+    var: arch
+- name: Obtain Ubuntu version codename
+  ansible.builtin.shell: 
+    cmd: cat /etc/os-release | grep VERSION_CODENAME | cut -d "=" -f2
+  register: cmd_output
+- name: Assign command output to a variable
+  ansible.builtin.set_fact:
+    version_codename: "{{cmd_output.stdout}}"
+- name: Print Ubuntu version codename
+  ansible.builtin.debug:
+    var: version_codename
+- name: Add Docker repository to Apt sources
+  become: true
+  ansible.builtin.template:
+    src: apt_repo_source_template.yml.j2
+    dest: /etc/apt/sources.list.d/docker.list
+  vars:
+    arch: "{{ arch }}"
+    version_codename: "{{ version_codename }}"
+# After adding Docker repo to sources it is important to do sudo apt update
+# otherwise apt install will not pick up the source and might report error like:
+# "No package matching 'docker-buildx-plugin' is available"
+- name: Update all apt packages to their latest version
+  become: true
+  ansible.builtin.apt:
+    upgrade: true
+    update_cache: true
+    cache_valid_time: 3600 # One hour
+  register: output_apt
+- name: Print output
+  ansible.builtin.debug:
+    var: output_apt.stdout_lines
+- name: Install the latest Docker packages
+  become: true
+  ansible.builtin.apt:
+    name:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-buildx-plugin
+    - docker-compose-plugin

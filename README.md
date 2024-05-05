@@ -7,7 +7,12 @@ $ ansible-playbook ./run_locally/hello_world.yaml
 $ ansible-navigator run ./run_locally/hello_world.yaml --mode stdout
 ```
 
+To run test playbooks e.g. `test_install_docker_engine.yaml`:
+```
+$ ansible-playbook ./playbooks/tests/test_install_docker_engine.yaml --ask-become-pass --verbose
+```
+
 To install minikube locally:
 ```
-$ ansible-playbook run_locally/install_minikube.yaml --ask-become-pass --verbose
+$ ansible-playbook ./playbooks/run_locally/install_minikube.yaml --ask-become-pass --verbose
 ```
