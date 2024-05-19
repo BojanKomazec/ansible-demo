@@ -1,0 +1,13 @@
+---
+- name: Install VirtualBox on Ubuntu
+  hosts: localhost
+  connection: local
+  gather_facts: true
+
+  # tasks:
+  #   - name: Print info message
+  #     ansible.builtin.debug:
+  #       msg: Installing Minikube
+
+  roles:
+    - role: install_virtualbox

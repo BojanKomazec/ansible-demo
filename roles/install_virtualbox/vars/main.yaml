@@ -1,0 +1,2 @@
+oracle_asc_key_path: /tmp/oracle_vbox_2016.asc
+oracle_gpg_key_path: /usr/share/keyrings/oracle-virtualbox-2016.gpg
