@@ -1,2 +1,3 @@
 oracle_asc_key_path: /tmp/oracle_vbox_2016.asc
 oracle_gpg_key_path: /usr/share/keyrings/oracle-virtualbox-2016.gpg
+oracle_gpg_key_fingerprint: B9F8 D658 297A F3EF C18D  5CDF A2F6 83C5 2980 AECF
