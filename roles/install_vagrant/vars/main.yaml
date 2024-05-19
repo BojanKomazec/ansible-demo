@@ -1,0 +1,6 @@
+hashicorp_asc_key_path: /tmp/hashicorp.asc
+hashicorp_gpg_key_path: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+# Note extra space character after 5th segment - it was added to match the format in the output of
+# gpg --with-fingerprint --show-keys /tmp/hashicorp.asc
+hashicorp_gpg_key_fingerprint: 798A EC65 4E5C 1542 8C8E  42EE AA16 FCBC A621 E701

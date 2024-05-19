@@ -1,0 +1,63 @@
+# Vagrant installation: https://developer.hashicorp.com/vagrant/install#linux
+#
+# Upon VirtualBox installation perform the following checks:
+# $ which vagrant
+# /usr/bin/vagrant
+# $ vagrant --version
+# Vagrant 2.4.1
+# $ ps aux | grep vagrant
+---
+- name: Download the Hashicorp PGP public key for verifying the signatures
+  ansible.builtin.get_url:
+    url: "https://apt.releases.hashicorp.com/gpg"
+    dest: "{{ hashicorp_asc_key_path }}"
+    mode: '0664'
+- name: Calculate key fingerprint
+  register: output
+  ansible.builtin.shell:
+    cmd: gpg --with-fingerprint --show-keys {{ hashicorp_asc_key_path }} | sed -n '2 s/^ *//g; 2p'
+- ansible.builtin.debug:
+    var: output
+- ansible.builtin.debug:
+    var: hashicorp_gpg_key_fingerprint
+- name: Verify the key, using a fingerprint, before import. End the play if fingerprint does not match the one provided.
+  ansible.builtin.meta: end_play
+  # Public key fingerprint taken from https://www.virtualbox.org/wiki/Linux_Downloads
+  when: output.stdout != hashicorp_gpg_key_fingerprint
+- name: Register the downloaded package signing key (add it to /usr/share/keyrings/)
+  ansible.builtin.command:
+    cmd: gpg --yes --output {{ hashicorp_gpg_key_path }} --dearmor {{ hashicorp_asc_key_path }}
+  become: true
+- name: Print Ubuntu distribution
+  # The same information can be obtained from the output of this command:
+  # $ lsb_release -cs
+  ansible.builtin.debug:
+    msg: "Ubuntu distribution is: {{ ansible_distribution_release }}"
+- name: Add Hashicorp package repo
+  ansible.builtin.deb822_repository:
+    architectures:
+      - amd64
+    enabled: true
+    # /etc/apt/sources.list.d/hashicorp.sources will be created
+    name: hashicorp
+    types:
+      - deb
+    uris:
+      - https://apt.releases.hashicorp.com
+    components:
+      - main
+    signed_by: "{{ hashicorp_gpg_key_path }}"
+    suites: "{{ ansible_distribution_release }}"
+  become: true
+- name: Update apt cache if the last one is more than 3600 seconds ago and install VirtualBox package
+  ansible.builtin.apt:
+    # Package name taken from https://download.virtualbox.org/virtualbox/debian/dists/jammy/contrib/binary-amd64/Packages
+    # ToDo: automate reading this information for a given distribution name.
+    name: vagrant
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+  register: output
+- name: Print command output
+  ansible.builtin.debug:
+    var: output
