@@ -1,0 +1,8 @@
+---
+- name: Install awscli on Ubuntu (globally)
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  roles:
+    - role: install_awscli
