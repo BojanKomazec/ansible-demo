@@ -1,0 +1,32 @@
+# ln -nfs /home/randonFolder mylink
+# -n, --no-dereference treat LINK_NAME as a normal file if it is a symbolic link to a directory
+# -f, --force; remove existing destination files
+# -s, --symbolic; make symbolic links instead of hard links
+#
+# Setup:
+# $ mkdir /home/bojan/mydir
+# $ ln -nfs /home/bojan/mydir /home/bojan/mydir_sl
+---
+- name: Symlinks demo
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Check if directory is a symlink
+      ansible.builtin.stat:
+        # path: "/home/bojan/mydir_sl"
+        path: "/srv/mydir_sl"
+      register: directory_stat
+    - name: Print stat
+      ansible.builtin.debug:
+        var: directory_stat
+    - name: Unlink the directory if it is a symlink
+      become: true
+      ansible.builtin.file:
+        # path: "/home/bojan/mydir_sl"
+        path: "/srv/mydir_sl"
+        state: absent
+      when: directory_stat.stat.islnk
+    # - name: Force link removal
+    #   ansible.builtin.shell: |
+    #     chdir="/home/bojan"
+    #     unlink mydir_sl
