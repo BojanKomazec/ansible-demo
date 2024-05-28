@@ -1,4 +1,6 @@
-#  https://ubuntu.com/blog/kvm-hyphervisor
+# https://ubuntu.com/blog/kvm-hyphervisor
+# https://ubuntu.com/server/docs/virtual-machine-manager
+# https://ubuntu.com/server/docs/libvirt
 ---
 - name: Install KVM on Ubuntu
   hosts: localhost
@@ -13,8 +15,17 @@
           - cpu-checker
           - libvirt-clients
           - libvirt-daemon
+          - libvirt-daemon-system
+          # - libvirt-manager
+          # installing this didn't create a default network or virtbr0
+          - libvirt-daemon-config-network
           - qemu
           - qemu-kvm
+          - virtinst
+          #  GUI program that is an "all in one" solution to manage virtual machines in general - create, modify, start/stop them
+          - virt-manager
+          # need this when working with headless guests
+          - libguestfs-tools
       register: apt_output
     - name: Print apt output
       ansible.builtin.debug:
@@ -29,3 +40,73 @@
     # todo: Report success if the output contains these lines:
     #       INFO: /dev/kvm exists
     #       KVM acceleration can be used
+# To test if libvirtd is running:
+#
+# $ systemctl status libvirtd
+# Unit libvirtd.service could not be found.
+#
+# Before installing libvirt-daemon-system:
+# - /usr/lib/systemd/system/ does not contain libvirtd.service
+#
+# - $ systemctl status libvirtd
+#   returns:
+#   Unit libvirtd.service could not be found.
+#
+# - $ sudo systemctl enable libvirtd
+#   returns:
+#   Failed to enable unit: Unit file libvirtd.service does not exist.
+#
+# - $ sudo systemctl start libvirtd
+#   returns:
+#   Failed to start libvirtd.service: Unit libvirtd.service not found.
+#
+# - $ ps u -C libvirtd
+#   retuns empty list:
+#   USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+#
+# Only after installing libvirt-daemon-system we have:
+#
+# $ ls -la /usr/lib/systemd/system/ | grep virt
+# -rw-r--r--  1 root root   357 Apr 12 18:48 libvirtd-admin.socket
+# -rw-r--r--  1 root root   364 Apr 12 18:48 libvirtd-ro.socket
+# -rw-r--r--  1 root root  1956 Apr 12 18:48 libvirtd.service
+# -rw-r--r--  1 root root   341 Apr 12 18:48 libvirtd.socket
+# -rw-r--r--  1 root root   306 Apr 12 18:48 libvirtd-tcp.socket
+# -rw-r--r--  1 root root   302 Apr 12 18:48 libvirtd-tls.socket
+# -rw-r--r--  1 root root   623 Apr 12 18:48 libvirt-guests.service
+# -rw-r--r--  1 root root    77 Jan 14  2022 virt-guest-shutdown.target
+# -rw-r--r--  1 root root   267 Apr 12 18:48 virtlockd-admin.socket
+# -rw-r--r--  1 root root   692 Apr 12 18:48 virtlockd.service
+# -rw-r--r--  1 root root   181 Apr 12 18:48 virtlockd.socket
+# -rw-r--r--  1 root root   256 Apr 12 18:48 virtlogd-admin.socket
+# -rw-r--r--  1 root root   825 Apr 12 18:48 virtlogd.service
+# -rw-r--r--  1 root root   179 Apr 12 18:48 virtlogd.socket
+#
+# $ ps u -C libvirtd
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+# root      554310  0.0  0.0 1553132 25120 ?       Ssl  12:04   0:00 /usr/sbin/libvirtd
+#
+# Daemon is enabled and started automatically upon installation:
+#
+# $ systemctl status libvirtd
+# ● libvirtd.service - Virtualization daemon
+#      Loaded: loaded (/lib/systemd/system/libvirtd.service; enabled; vendor preset: enabled)
+#      Active: active (running) since Mon 2024-05-06 12:04:44 BST; 7min ago
+# TriggeredBy: ● libvirtd-ro.socket
+#              ● libvirtd.socket
+#              ● libvirtd-admin.socket
+#        Docs: man:libvirtd(8)
+#              https://libvirt.org
+#    Main PID: 554310 (libvirtd)
+#       Tasks: 19 (limit: 32768)
+#      Memory: 8.0M
+#         CPU: 334ms
+#      CGroup: /system.slice/libvirtd.service
+#              └─554310 /usr/sbin/libvirtd
+
+# May 06 12:04:44 bobox systemd[1]: Starting Virtualization daemon...
+# May 06 12:04:44 bobox systemd[1]: Started Virtualization daemon.
+#
+# To start the daemon manually:
+# $ sudo systemctl enable libvirtd
+# $ sudo systemctl start libvirtd
