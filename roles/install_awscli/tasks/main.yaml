@@ -1,25 +1,40 @@
 # Install awscli on Ubuntu globally (not in user site)
 # https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 ---
-- name:  Download the installation file and unarchive it
+# TODO: Improve this by downloading the installer only if version newer than installed is available.
+- name: Download the installation file and unarchive it
   # Downloaded file is saved in a new directory created in /home/USER/.ansible/tmp/
   ansible.builtin.unarchive:
     src: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
     dest: /tmp
     remote_src: true
   become: false
-# TODO: add step which checks if awscli is already installed as otherwise this error occurs:
+- name: Check if AWS CLI has already been installed
+  ansible.builtin.command:
+    cmd: which aws
+  register: output
+  changed_when: False
+- name: Print output
+  ansible.builtin.debug:
+    var: output
+# A step which checks if awscli is already installed is required as otherwise this error occurs:
 # stderr": "Found preexisting AWS CLI installation: /usr/local/aws-cli/v2/current. Please rerun install script with --update flag."
-- name: Run the install program
+- name: Run the installer (fresh installation)
   ansible.builtin.command:
     cmd: /tmp/aws/install
-    # cmd: /tmp/aws/install --update
   become: true
+  when: output.stdout == ""
+- name: Run the installer (update)
+  ansible.builtin.command:
+    cmd: /tmp/aws/install --update
+  become: true
+  when: output.stdout != ""
 - name: Confirm the installation
   ansible.builtin.command:
     cmd: aws --version
   register: output
-- debug: var=output.stdout
+- name: Print output
+  debug: var=output.stdout
 - name: Clean up /tmp
   ansible.builtin.file:
     path: '/tmp/aws/'
