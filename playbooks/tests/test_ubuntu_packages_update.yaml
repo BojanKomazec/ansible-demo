@@ -1,0 +1,8 @@
+---
+- name: Update Ubuntu (apt) packages
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  roles:
+    - role: bkomazec.ubuntu_packages_update

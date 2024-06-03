@@ -11,7 +11,8 @@
     # Use eaither upgrade or name and state
     # name: "*"
     # state: latest
-  register: output_apt
+  register: output
 - name: Print output
   ansible.builtin.debug:
-    var: output_apt.stdout_lines
+    var: output.stdout_lines
+
