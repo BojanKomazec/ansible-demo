@@ -16,3 +16,7 @@ To install minikube locally:
 ```
 $ ansible-playbook ./playbooks/run_locally/install_minikube.yaml --ask-become-pass --verbose
 ```
+
+# Notes
+
+If you need to use pipe (`|`) operator in order to pipe the output of one command into another then use `ansible.builtin.shell` instead of `ansible.builtin.command`.

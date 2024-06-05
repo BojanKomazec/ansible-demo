@@ -1,0 +1,2 @@
+---
+anaconda_installer_file_path: /tmp/{{ anaconda_installer_file_name }}

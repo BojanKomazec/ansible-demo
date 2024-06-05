@@ -1,0 +1,118 @@
+# https://docs.anaconda.com/free/anaconda/install/silent-mode/?highlight=latest#anaconda-distribution-installers
+---
+# might be required for certain versions of Anaconda Distribution in order to use GUI packages with Linux
+# - name: Install extended dependencies for qt
+#   ansible.builtin.apt:
+#     pkg:
+#       - libgl1-mesa-glx
+#       - libegl1-mesa
+#       - libxrandr2
+#       - libxrandr2
+#       - libxss1
+#       - libxcursor1
+#       - libxcomposite1
+#       - libasound2
+#       - libxi6
+#       - libxtst6
+- name: Get the latest Anaconda version
+  ansible.builtin.shell:
+    cmd: curl -sS https://repo.anaconda.com/archive/ | grep -Po '(?<=Anaconda3-)([0-9]*.[0-9]*-[0-9]*)(?=-Linux-x86_64)' | head -n1
+  register: output
+- name: Put Anaconda version into a variable
+  ansible.builtin.set_fact:
+    anaconda_version_latest: "{{ output.stdout }}"
+- name: Print the latest available Anaconda version
+  ansible.builtin.debug:
+    msg: "{{ anaconda_version_latest }}"
+- name: Build Anaconda installer file name
+  ansible.builtin.set_fact:
+    anaconda_installer_file_name: "Anaconda3-{{ anaconda_version_latest }}-Linux-x86_64.sh"
+- name: Print the Anaconda installer file name
+  ansible.builtin.debug:
+    msg: "{{ anaconda_installer_file_name }}"
+- name: Download Anaconda installer
+  ansible.builtin.get_url:
+    url: "https://repo.anaconda.com/archive/{{ anaconda_installer_file_name }}"
+    dest: "{{ anaconda_installer_file_path }}"
+    # mode: '0744'
+# (Optional) Verify the integrity of the installer after downloading it.
+# - name: Extract SHA256 for the .sh installer from https://repo.anaconda.com/archive/ or https://docs.anaconda.com/free/anaconda/hashes/
+  # Save it in variable anaconda_installer_sha256
+#- name: Calculate SHA256 checksum of the downloaded installer file
+  # ansible.builtin.command:
+    # cmd: shasum -a 256 "/tmp/{{ anaconda_installer_file_name }}"
+    # save this into a variable anaconda_installer_sha256_local
+  # compare anaconda_installer_sha256 and anaconda_installer_sha256_local
+  # exit the script if not matching
+# TODO: Check if anaconda is already installed and if it is, add parameter -u when calling the installer.
+# Alternatively, re-run the installer with -f flag (force installation).
+# Running the installer on the system which already has Anaconda installed results with this error:
+# ["ERROR: File or directory already exists: '/home/bojan/anaconda'", "If you want to update an existing installation, use the -u option."]
+- name: Run the installer silently
+  ansible.builtin.shell:
+    # Use -p to specify custom installation directory. Default is: $HOME/anaconda3.
+    # cmd: bash {{ anaconda_installer_file_path }} -b -p $HOME/anaconda -f
+    cmd: bash {{ anaconda_installer_file_path }} -b -f
+  register: output
+- name: Print Anaconda installation terminal output
+  ansible.builtin.debug:
+    msg: "{{ output }}"
+- name: Activate Anaconda in the output_shell
+  # conda init adds conda initialize section to /home/USER/.bashrc between
+  # If we want to use /bin/sh (default shell) then we need to replace 'source' with '.' in cmd.
+  ansible.builtin.shell:
+    cmd: $HOME/anaconda3/bin/conda init
+  args:
+    executable: /bin/bash
+    # cmd: eval "$(/$HOME/anaconda/bin/anaconda shell.bash hook)" && anaconda init
+    # cmd: echo $PATH && source $HOME/anaconda/bin/activate && $HOME/anaconda/bin/conda init
+  register: output
+  # environment:
+  #   PATH: "{{ ansible_env.HOME }}/anaconda/bin/:{{ ansible_env.PATH }}"
+- name: Print output
+  ansible.builtin.debug:
+    msg: "{{ output }}"
+- name: Activate
+  ansible.builtin.shell:
+    # This command executes  $HOME/anaconda3/etc/profile.d/conda.sh in order to add
+    # conda activate|deactivate|install|update|upgrade|remove|uninstall commands into
+    # the current shell.
+    cmd: . $HOME/anaconda3/bin/activate
+  args:
+    executable: /bin/bash
+  register: output
+- name: Print output
+  ansible.builtin.debug:
+    msg: "{{ output }}"
+#
+# Test: open a new shell terminal
+#
+# $ which conda
+# /home/USER/anaconda3/bin/conda
+#
+# $ conda --version
+# conda 24.1.2
+#
+# $ conda activate
+# (base) $ <-- we are in virtual environment
+#
+# (base) $ which anaconda
+# /home/bojan/anaconda3/bin/anaconda
+#
+# (base) $ anaconda --version
+# anaconda Command line client (version 1.12.3)
+#
+# (base) $ conda deactivate
+# $ <-- we left the virtual environment
+#
+# I could not make this step working:
+# - name: Test Anaconda installation
+#   ansible.builtin.shell:
+#     cmd: conda init && conda activate && which anaconda && anaconda --version && conda deactivate
+#   args:
+#     executable: /bin/bash
+#   register: output
+# - name: Print output
+#   ansible.builtin.debug:
+#     msg: "{{ output }}"
+
