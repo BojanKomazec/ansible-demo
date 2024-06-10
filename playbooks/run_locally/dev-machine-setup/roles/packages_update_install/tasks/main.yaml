@@ -5,11 +5,25 @@
     name: "*"
     state: latest
     cache_valid_time: 86400 # seconds in 1 day
-- debug: var=output
-- name: Install a list of packages
+- name: Print output
+  ansible.builtin.debug:
+    var: output
+# - name: Install apt packages
+#   become: true
+#   register: output
+#   ansible.builtin.apt:
+#     pkg:
+#     # - rpm
+#     # - mdless
+# - name: Print output
+#   ansible.builtin.debug:
+#     var: output
+- name: Install snap packages
   become: true
+  community.general.snap:
+    name:
+      - mdless
   register: output
-  ansible.builtin.apt:
-    pkg:
-    - rpm
-- debug: var=output
+- name: Print output
+  ansible.builtin.debug:
+    var: output

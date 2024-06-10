@@ -1,9 +1,9 @@
 ---
-- name: Setup Bojan's dev machine
+- name: Setup Bojan's Ubuntu dev machine
   hosts: localhost
   connection: local
   roles:
-    # - packages_update_install
+    - packages_update_install
     # - install_vscode
     # - install_zoom
     # - install_slack
@@ -11,8 +11,8 @@
     # - install_keepassxc
     # - generate_corporate_git_ssh_keys
     # - install_docker_desktop
-    - install_mysql_client_apps
-  vars_prompt:
-  - name: corporate_git_ssh_key_password
-    prompt: "Corporate Git SSH key password"
-    private: yes
+    # - install_mysql_client_apps
+  # vars_prompt:
+  # - name: corporate_git_ssh_key_password
+  #   prompt: "Corporate Git SSH key password"
+  #   private: yes

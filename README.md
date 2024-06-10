@@ -1,6 +1,12 @@
 # ansible-demo
 Repository contains various demo Ansible playbooks.
 
+Some playbooks are using modules from community.general Ansible collection. To
+install it:
+```
+$ ansible-galaxy collection install community.general
+```
+
 To run playbooks use ansible-playbook or ansible-navigator:
 ```
 $ ansible-playbook ./run_locally/hello_world.yaml
@@ -15,6 +21,10 @@ $ ansible-playbook ./playbooks/tests/test_install_docker_engine.yaml --ask-becom
 To install minikube locally:
 ```
 $ ansible-playbook ./playbooks/run_locally/install_minikube.yaml --ask-become-pass --verbose
+```
+To increase the output verbosity, use `-vvv`:
+```
+$ ansible-playbook ./playbooks/run_locally/install_minikube.yaml --ask-become-pass -vvv
 ```
 
 # Notes
