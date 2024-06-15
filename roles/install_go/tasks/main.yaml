@@ -1,0 +1,4 @@
+# use https://go.dev/VERSION?m=text or https://go.dev/dl/?mode=json to find the lastest go version
+# VERSION=$(curl -s https://go.dev/dl/?mode=json | jq -r '.[0].version')
+
+# https://go.dev/doc/install

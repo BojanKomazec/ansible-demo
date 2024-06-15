@@ -30,3 +30,8 @@ $ ansible-playbook ./playbooks/run_locally/install_minikube.yaml --ask-become-pa
 # Notes
 
 If you need to use pipe (`|`) operator in order to pipe the output of one command into another then use `ansible.builtin.shell` instead of `ansible.builtin.command`.
+
+
+## community.general.snap
+Snaps update automatically, and by default, the snapd daemon checks for updates 4 times a day.
+Each update check is called a refresh. Source: https://snapcraft.io/docs/refresh-awareness

@@ -1,0 +1,19 @@
+---
+- name: Install Helm
+  become: true
+  community.general.snap:
+    classic: true
+    name:
+      - helm
+  register: output
+- name: Print output
+  ansible.builtin.debug:
+    var: output
+- name: Verify Helm version
+  ansible.builtin.command:
+    cmd: helm version
+  register: output
+- name: Print output
+  ansible.builtin.debug:
+    var: output
+
