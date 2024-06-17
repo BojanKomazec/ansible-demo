@@ -1,0 +1,2 @@
+hashicorp_asc_key_path: /tmp/hashicorp.asc
+hashicorp_gpg_key_path: /usr/share/keyrings/hashicorp-archive-keyring.gpg
