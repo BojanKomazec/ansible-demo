@@ -6,7 +6,7 @@
     - packages_update_install
     - install_helm
     - install_terraform
-    # - install_vscode
+    - install_vscode
     # - install_zoom
     # - install_slack
     # - install_chrome
