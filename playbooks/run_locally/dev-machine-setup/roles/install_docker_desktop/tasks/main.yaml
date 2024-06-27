@@ -1,65 +1,126 @@
-- name: check ownership of /dev/kvm
+- name: Check ownership of /dev/kvm
   register: output
-  ansible.builtin.command: 
+  ansible.builtin.command:
     cmd: ls -al /dev/kvm
-- debug: var=output.stdout
+  changed_when: false
+- name: Print output
+  ansible.builtin.debug:
+    var: output.stdout
 - name: Add your (non-root) user to the kvm group in order to access the kvm device
   register: output
-  become: yes
-  ansible.builtin.command: 
+  become: true
+  ansible.builtin.command:
     # $USER is root if become:yes
     # cmd: usermod -aG kvm $USER
-    cmd: usermod -aG kvm {{ non_root_user }}
-- debug: var=output.stdout
+    cmd: usermod -aG kvm {{ install_docker_desktop_non_root_user }}
+  changed_when: true
+- name: Print output
+  ansible.builtin.debug:
+    var: output.stdout
 - name: Verify that (non-root) user is in kvm group
   register: output
-  become: yes
-  ansible.builtin.command: 
-    cmd: groups {{ non_root_user }}
-- debug: var=output.stdout
+  become: true
+  ansible.builtin.command:
+    cmd: groups {{ install_docker_desktop_non_root_user }}
+  changed_when: false
+- name: Print output
+  ansible.builtin.debug:
+    var: output.stdout
 - name: Install required apt packages
-  become: yes
+  become: true
   register: output
   ansible.builtin.apt:
     pkg:
-    - ca-certificates
-    - curl
-    - gnupg
-    - lsb-release
-- debug: var=output.stdout
-- name: create APT keyring directory
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+- name: Print output
+  ansible.builtin.debug:
+    var: output.stdout
+- name: Create APT keyring directory
   register: output
   ansible.builtin.file:
     path: /etc/apt/keyrings
     state: directory
-- debug: var=output.stdout
-- name: Add Docker’s official GPG key
-  become: yes
-  register: output
-  # "curl: option --dearmor: is unknown"
-  # ansible.builtin.command: 
-  #   cmd: curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  # apt_key:
+    mode: '0755'
+- name: Print output
+  ansible.builtin.debug:
+    var: output.stdout
+- name: Download Docker PGP public key for verifying the signatures
   ansible.builtin.get_url:
+    # https://download.docker.com/linux/debian/gpg
     url: https://download.docker.com/linux/ubuntu/gpg
-    dest: /etc/apt/keyrings/docker.gpg
-- debug: var=output.stdout
-- name: set up the repository
+    dest: "{{ docker_asc_key_path }}"
+    mode: '444'
+- name: Register the downloaded package signing key (add it to /usr/share/keyrings/)
+  become: true
   register: output
-  ansible.builtin.command: 
-    cmd: >
-      echo
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu
-      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-- debug: var=output
-- name: download latest Deb package 
-  register: output
-  ansible.builtin.get_url:
-    url: https://desktop.docker.com/linux/main/amd64/docker-desktop-4.12.0-amd64.deb
-    dest: "{{ desktop_docker_deb_package_path }}"
-- debug: var=output.stdout
-- name: Install deb package
-  register: output
+  ansible.builtin.command:
+    cmd: gpg --yes -o "{{ docker_gpg_key_path }}" --dearmor "{{ docker_asc_key_path }}"
+- name: Print output
+  ansible.builtin.debug:
+    var: output.stdout
+# - name: Set up the repository
+#   register: output
+#   ansible.builtin.command:
+#     cmd: >
+#       echo
+#       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu
+#       $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+- name: Add Docker package repo
+# Use $(dpkg --print-architecture) instead of hardcoded amd64
+  ansible.builtin.deb822_repository:
+    architectures:
+      - amd64
+    enabled: true
+    # /etc/apt/sources.list.d/docker.list will be created
+    name: docker
+    types:
+      - deb
+    uris:
+      - https://download.docker.com/linux/ubuntu
+    components:
+      - stable
+    signed_by: "{{ docker_gpg_key_path }}"
+    suites: "{{ ansible_distribution_release }}"
+  become: true
+- name: Print output
+  ansible.builtin.debug:
+    var: output
+# - name: Download latest Deb package
+#   register: output
+#   ansible.builtin.get_url:
+#     url: https://desktop.docker.com/linux/main/amd64/docker-desktop-4.12.0-amd64.deb
+#     dest: "{{ install_docker_desktop_desktop_docker_deb_package_path }}"
+- name: Update apt cache if the last one is more than 3600 seconds ago and install Docker packages
   ansible.builtin.apt:
-    deb: "{{ desktop_docker_deb_package_path }}"
+    # Package name taken from https://download.virtualbox.org/virtualbox/debian/dists/jammy/contrib/binary-amd64/Packages
+    # ToDo: automate reading this information for a given distribution name.
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      # - docker-buildx-plugin
+      # - docker-compose-plugin
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+  register: output
+- name: Print output
+  ansible.builtin.debug:
+    var: output
+# - name: Install deb package
+#   register: output
+#   ansible.builtin.apt:
+#     deb: "{{ install_docker_desktop_desktop_docker_deb_package_path }}"
+- name: Allow a non-root user to run Docker commands
+  ansible.builtin.shell:
+    cmd: usermod -aG docker {{ install_docker_desktop_non_root_user }} && newgrp docker
+  register: output
+  become: true
+  changed_when: true
+- name: Print output
+  ansible.builtin.debug:
+    var: output
 

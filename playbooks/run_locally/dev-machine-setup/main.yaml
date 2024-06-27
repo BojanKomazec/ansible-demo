@@ -2,17 +2,18 @@
 - name: Setup Bojan's Ubuntu dev machine
   hosts: localhost
   connection: local
+  gather_facts: true
   roles:
     - packages_update_install
-    - install_helm
-    - install_terraform
-    - install_vscode
+    # - install_helm
+    # - install_terraform
+    # - install_vscode
     # - install_zoom
     # - install_slack
     # - install_chrome
     # - install_keepassxc
     # - generate_corporate_git_ssh_keys
-    # - install_docker_desktop
+    - install_docker_desktop
     # - install_mysql_client_apps
   # vars_prompt:
   # - name: corporate_git_ssh_key_password

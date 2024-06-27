@@ -1,13 +1,19 @@
-# This script follows steps listed here: https://docs.docker.com/engine/install/debian/#install-using-the-repository
-# To verify Docker installation run: 
+# This script follows steps listed here:
+# https://docs.docker.com/engine/install/debian/#install-using-the-repository
+#
+# Release notes: https://docs.docker.com/engine/release-notes/
+#
+# Docker binary gets installed here: /usr/bin/docker
+#
+# To verify Docker installation run:
 #    $ sudo docker run hello-world
 ---
 - name: Install apt packages install ca-certificates curl
   become: true
   ansible.builtin.apt:
     name:
-    - ca-certificates
-    - curl
+      - ca-certificates
+      - curl
 - name: Create /etc/apt/keyrings directory and set 0755 permissions
   become: true
   ansible.builtin.file:
@@ -27,19 +33,21 @@
   ansible.builtin.command:
     cmd: dpkg --print-architecture
   register: cmd_output
+  changed_when: false
 - name: Assign dpkg output to a variable
   ansible.builtin.set_fact:
-    arch: "{{cmd_output.stdout}}"
+    arch: "{{ cmd_output.stdout }}"
 - name: Print processor architecture
   ansible.builtin.debug:
     var: arch
 - name: Obtain Ubuntu version codename
-  ansible.builtin.shell: 
+  ansible.builtin.shell:
     cmd: cat /etc/os-release | grep VERSION_CODENAME | cut -d "=" -f2
   register: cmd_output
+  changed_when: false
 - name: Assign command output to a variable
   ansible.builtin.set_fact:
-    version_codename: "{{cmd_output.stdout}}"
+    version_codename: "{{ cmd_output.stdout }}"
 - name: Print Ubuntu version codename
   ansible.builtin.debug:
     var: version_codename
@@ -68,8 +76,9 @@
   become: true
   ansible.builtin.apt:
     name:
-    - docker-ce
-    - docker-ce-cli
-    - containerd.io
-    - docker-buildx-plugin
-    - docker-compose-plugin
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+
